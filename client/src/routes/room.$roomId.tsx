@@ -1,24 +1,57 @@
 import { createFileRoute } from "@tanstack/react-router";
-import { useRef, useState, type FormEvent } from "react";
+import { useEffect, useRef, useState, type FormEvent } from "react";
 
 export const Route = createFileRoute("/room/$roomId")({
   component: RoomComponent,
 });
 
+interface IMessage {
+  username: string;
+  message: string;
+}
+
 function RoomComponent() {
-  const [message, setMessage] = useState("");
+  const [msgout, setMsgout] = useState("");
+  const [msgin, setMsgin] = useState<IMessage[]>([
+    { username: "room", message: "room created" },
+  ]);
   const divRef = useRef<HTMLDivElement>(null);
   const { roomId } = Route.useParams();
+  const ws = useRef<WebSocket>(null);
+
+  useEffect(() => {
+    ws.current = new WebSocket(
+      `ws://localhost:8000/room?roomId=${roomId}&username=realizer`,
+    );
+    ws.current.onopen = () => {
+      console.log("WebSocket Client Connected");
+    };
+
+    ws.current.onmessage = (e) => {
+      console.log(e.data);
+      const data = JSON.parse(e.data);
+      setMsgin((prev) => [
+        ...prev,
+        {
+          username: data.username,
+          message: data.message,
+        },
+      ]);
+    };
+    return () => ws.current?.close();
+  }, []);
+
   const handleSubmit = (e: FormEvent) => {
     e.preventDefault();
-    setMessage("");
+    setMsgout("");
     if (divRef.current) divRef.current.innerText = "";
-    if (message.trim() === "") return;
+    if (msgout.trim() === "") return;
+    ws.current?.send(msgout);
   };
 
   const handleInput = (e: React.FormEvent<HTMLDivElement>) => {
     const text = e.currentTarget.innerText;
-    setMessage(text.trim());
+    setMsgout(text.trim());
   };
 
   const handleKeyDown = (e: React.KeyboardEvent<HTMLDivElement>) => {
@@ -30,14 +63,18 @@ function RoomComponent() {
   return (
     <>
       <div className="flex-1 overflow-scroll flex flex-col-reverse">
-        <ol></ol>
+        <ol>
+          {msgin.map((item) => (
+            <div>{item.username + " : " + item.message}</div>
+          ))}
+        </ol>
       </div>
       <form
         onSubmit={handleSubmit}
         className="border border-zinc-400 min-h-12 rounded-md mb-4 mx-2 flex items-center text-black group focus-within:border-zinc-200 transition-colors duration-200"
       >
         <div className="flex-1">
-          {!message && (
+          {!msgout && (
             <div
               className="text-zinc-400 select-none absolute mx-4 my-2 text-sm"
               aria-hidden="true"
@@ -63,9 +100,9 @@ function RoomComponent() {
           <div className="border border-zinc-400 h-6 mr-4"></div>
           <button
             type="submit"
-            disabled={!message}
+            disabled={!msgout}
             className={`h-fit flex items-center justify-center group mr-4
-                    ${message ? "text-blue-400 cursor-pointer" : "text-zinc-400 cursor-not-allowed"}`}
+                    ${msgout ? "text-blue-400 cursor-pointer" : "text-zinc-400 cursor-not-allowed"}`}
           >
             <svg
               xmlns="http://www.w3.org/2000/svg"

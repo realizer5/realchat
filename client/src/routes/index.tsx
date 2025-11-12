@@ -10,48 +10,45 @@ import {
 import { Input } from "@/components/ui/input";
 import { Label } from "@radix-ui/react-label";
 import { createFileRoute } from "@tanstack/react-router";
+import { useState, type FormEvent } from "react";
 
 export const Route = createFileRoute("/")({
   component: Index,
 });
 
 function Index() {
+  const [username, setUsername] = useState("");
+
+  const handleSubmit = (e: FormEvent) => {
+    e.preventDefault();
+  };
   return (
     <div className="w-full min-h-screen grid place-items-center">
       <Card className="w-full max-w-sm">
         <CardHeader>
           <CardTitle>Create your chat rom</CardTitle>
-          <CardDescription>Enter your username and room name</CardDescription>
+          <CardDescription>Enter your username</CardDescription>
         </CardHeader>
-        <CardContent>
-          <form>
-            <div className="flex flex-col gap-6">
-              <div className="grid gap-2">
-                <Label htmlFor="username">Username</Label>
-                <Input
-                  id="username"
-                  type="text"
-                  placeholder="realizer"
-                  required
-                />
-              </div>
-              <div className="grid gap-2">
-                <Label htmlFor="roomname">Room Name</Label>
-                <Input
-                  id="roomname"
-                  type="text"
-                  placeholder="realizer's room"
-                  required
-                />
-              </div>
+        <form onSubmit={handleSubmit}>
+          <CardContent>
+            <div className="grid gap-2 mb-2">
+              <Label htmlFor="username">Username</Label>
+              <Input
+                id="username"
+                type="text"
+                placeholder="realizer"
+                value={username}
+                onChange={(e) => setUsername(e.target.value)}
+                required
+              />
             </div>
-          </form>
-        </CardContent>
-        <CardFooter className="flex-col gap-2">
-          <Button type="submit" className="w-full">
-            Create Room
-          </Button>
-        </CardFooter>
+          </CardContent>
+          <CardFooter className="flex-col gap-2">
+            <Button type="submit" className="w-full">
+              Create Room
+            </Button>
+          </CardFooter>
+        </form>
       </Card>
     </div>
   );
