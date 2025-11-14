@@ -1,4 +1,6 @@
+import { ModeToggle } from "@/components/mode-toggle";
 import { createFileRoute } from "@tanstack/react-router";
+import { SendHorizonal } from "lucide-react";
 import { useEffect, useRef, useState, type FormEvent } from "react";
 
 export const Route = createFileRoute("/room/$roomId")({
@@ -12,23 +14,21 @@ interface IMessage {
 
 function RoomComponent() {
   const [msgout, setMsgout] = useState("");
-  const [msgin, setMsgin] = useState<IMessage[]>([
-    { username: "room", message: "room created" },
-  ]);
+  const [msgin, setMsgin] = useState<IMessage[]>([]);
   const divRef = useRef<HTMLDivElement>(null);
-  const { roomId } = Route.useParams();
   const ws = useRef<WebSocket>(null);
+  const { roomId } = Route.useParams();
+  const username = localStorage.getItem("username");
 
   useEffect(() => {
     ws.current = new WebSocket(
-      `ws://localhost:8000/room?roomId=${roomId}&username=realizer`,
+      `ws://localhost:8000/room?roomId=${roomId}&username=${username}`,
     );
     ws.current.onopen = () => {
       console.log("WebSocket Client Connected");
     };
 
     ws.current.onmessage = (e) => {
-      console.log(e.data);
       const data = JSON.parse(e.data);
       setMsgin((prev) => [
         ...prev,
@@ -61,22 +61,30 @@ function RoomComponent() {
     }
   };
   return (
-    <>
+    <div className="flex flex-col h-screen">
       <div className="flex-1 overflow-scroll flex flex-col-reverse">
         <ol>
-          {msgin.map((item) => (
-            <div>{item.username + " : " + item.message}</div>
+          {msgin.map((msg, index) => (
+            <li key={index} className="p-2 mb-2">
+              <p className="font-semibold text-blue-400">{msg.username}</p>
+              <p className="whitespace-pre-wrap wrap-break-word">
+                {msg.message}
+              </p>
+            </li>
           ))}
         </ol>
       </div>
       <form
         onSubmit={handleSubmit}
-        className="border border-zinc-400 min-h-12 rounded-md mb-4 mx-2 flex items-center text-black group focus-within:border-zinc-200 transition-colors duration-200"
+        className="border border-zinc-400 min-h-12 rounded-md mb-4 mx-2 flex items-center group focus-within:border-zinc-200 transition-colors duration-200"
       >
+        <div className="h-full py-2 ml-2">
+          <ModeToggle />
+        </div>
         <div className="flex-1">
           {!msgout && (
             <div
-              className="text-zinc-400 select-none absolute mx-4 my-2 text-sm"
+              className="select-none absolute mx-4 my-2 text-sm"
               aria-hidden="true"
             >
               Type your message here...
@@ -104,24 +112,10 @@ function RoomComponent() {
             className={`h-fit flex items-center justify-center group mr-4
                     ${msgout ? "text-blue-400 cursor-pointer" : "text-zinc-400 cursor-not-allowed"}`}
           >
-            <svg
-              xmlns="http://www.w3.org/2000/svg"
-              width="24"
-              height="24"
-              viewBox="0 0 24 24"
-              fill="none"
-              stroke="currentColor"
-              strokeWidth="2"
-              strokeLinecap="round"
-              strokeLinejoin="round"
-              className="transition-colors duration-200"
-            >
-              <path d="M3.714 3.048a.498.498 0 0 0-.683.627l2.843 7.627a2 2 0 0 1 0 1.396l-2.842 7.627a.498.498 0 0 0 .682.627l18-8.5a.5.5 0 0 0 0-.904z" />
-              <path d="M6 12h16" />
-            </svg>
+            <SendHorizonal />
           </button>
         </div>
       </form>
-    </>
+    </div>
   );
 }

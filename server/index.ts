@@ -4,6 +4,8 @@ interface WebsocketData {
   roomId: string;
 }
 
+const rooms = new Set<string>();
+
 const server = Bun.serve<WebsocketData>({
   port: 8000,
   fetch(req, server) {

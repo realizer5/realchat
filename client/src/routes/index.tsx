@@ -1,6 +1,8 @@
+import { ModeToggle } from "@/components/mode-toggle";
 import { Button } from "@/components/ui/button";
 import {
   Card,
+  CardAction,
   CardContent,
   CardDescription,
   CardFooter,
@@ -9,7 +11,7 @@ import {
 } from "@/components/ui/card";
 import { Input } from "@/components/ui/input";
 import { Label } from "@radix-ui/react-label";
-import { createFileRoute } from "@tanstack/react-router";
+import { createFileRoute, useNavigate } from "@tanstack/react-router";
 import { useState, type FormEvent } from "react";
 
 export const Route = createFileRoute("/")({
@@ -18,9 +20,18 @@ export const Route = createFileRoute("/")({
 
 function Index() {
   const [username, setUsername] = useState("");
+  const navigate = useNavigate({ from: "/" });
 
   const handleSubmit = (e: FormEvent) => {
     e.preventDefault();
+    localStorage.setItem("username", username);
+    const roomId = Math.random()
+      .toString(36)
+      .substring(2)
+      .split("")
+      .map((ch) => (Math.random() < 0.5 ? ch.toUpperCase() : ch))
+      .join("");
+    navigate({ to: "/room/$roomId", params: { roomId } });
   };
   return (
     <div className="w-full min-h-screen grid place-items-center">
@@ -28,6 +39,9 @@ function Index() {
         <CardHeader>
           <CardTitle>Create your chat rom</CardTitle>
           <CardDescription>Enter your username</CardDescription>
+          <CardAction>
+            <ModeToggle />
+          </CardAction>
         </CardHeader>
         <form onSubmit={handleSubmit}>
           <CardContent>
