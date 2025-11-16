@@ -3,11 +3,10 @@ interface WebsocketData {
   username: string;
   roomId: string;
 }
-
-const rooms = new Set<string>();
+const port = process.env.PORT || 8000;
 
 const server = Bun.serve<WebsocketData>({
-  port: 8000,
+  port: port,
   fetch(req, server) {
     const url = new URL(req.url);
     if (url.pathname === "/api/status/") {
@@ -34,8 +33,8 @@ const server = Bun.serve<WebsocketData>({
       server.publish(
         roomId,
         JSON.stringify({
-          username: "system",
-          message: `${ws.data.username} has entered the chat`,
+          username: "",
+          message: `${ws.data.username} has entered the room`,
         }),
       );
     },
@@ -49,8 +48,18 @@ const server = Bun.serve<WebsocketData>({
         }),
       );
     },
-    close(ws) {},
+    close(ws) {
+      const roomId = ws.data.roomId;
+      ws.unsubscribe(roomId);
+      server.publish(
+        roomId,
+        JSON.stringify({
+          username: "",
+          message: `${ws.data.username} left the room`,
+        }),
+      );
+    },
   },
 });
 
-console.log(`✅ WebSocket server running on ws://localhost:8000/room`);
+console.log(`✅ WebSocket server running on ${port}`);

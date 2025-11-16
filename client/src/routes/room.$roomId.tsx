@@ -21,8 +21,9 @@ function RoomComponent() {
   const username = localStorage.getItem("username");
 
   useEffect(() => {
+    const wsUrl = import.meta.env.VITE_WEBSOCKET_URL;
     ws.current = new WebSocket(
-      `ws://localhost:8000/room?roomId=${roomId}&username=${username}`,
+      `${wsUrl}/room?roomId=${roomId}&username=${username}`,
     );
     ws.current.onopen = () => {
       console.log("WebSocket Client Connected");
@@ -39,7 +40,7 @@ function RoomComponent() {
       ]);
     };
     return () => ws.current?.close();
-  }, []);
+  }, [roomId, username]);
 
   const handleSubmit = (e: FormEvent) => {
     e.preventDefault();
