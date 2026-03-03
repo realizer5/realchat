@@ -63,7 +63,7 @@ function RoomComponent() {
   };
   return (
     <div className="flex flex-col h-screen">
-      <div className="flex-1 overflow-scroll flex flex-col-reverse">
+      <div className="flex-1 overflow-auto flex flex-col-reverse">
         <ol>
           {msgin.map((msg, index) => (
             <li key={index} className="p-2 mb-2">
@@ -93,7 +93,7 @@ function RoomComponent() {
           )}
           <div
             ref={divRef}
-            className="text-sm whitespace-pre-wrap wrap-break-word flex-1 outline-none px-4 py-2 relative z-10 max-h-[40vh] overflow-scroll scroll-pb-2"
+            className="text-sm whitespace-pre-wrap wrap-break-word flex-1 outline-none px-4 py-2 relative z-10 max-h-[40vh] overflow-auto scroll-pb-2"
             role="textarea"
             aria-multiline="true"
             aria-invalid="false"
